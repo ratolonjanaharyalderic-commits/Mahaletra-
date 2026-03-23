@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="mg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d1117">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MahaLetra">
+<meta name="description" content="Révise intelligemment avec l'IA — pour les étudiants malgaches">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>MahaLetra — Révise intelligemment</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1117;
+  --bg2: #141b24;
+  --bg3: #1c2635;
+  --card: #1a2332;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.15);
+  --accent: #00d4aa;
+  --accent2: #7c6af7;
+  --accent3: #ff6b6b;
+  --text: #e8edf4;
+  --text2: #8899aa;
+  --text3: #556677;
+  --warning: #ffbe45;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(0,212,170,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,212,170,0.025) 1px,transparent 1px);
+  background-size:44px 44px;
+  pointer-events:none;z-index:0;
+}
+
+/* ===== INSTALL BANNER ===== */
+#install-banner{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;
+  background:linear-gradient(135deg,#1a2332,#1c2635);
+  border-top:1px solid rgba(0,212,170,0.2);
+  padding:16px 20px calc(16px + var(--safe-bottom));
+  z-index:200;
+  animation:slideUp 0.4s ease;
+}
+#install-banner.show{display:flex;align-items:center;gap:14px}
+.install-icon{font-size:32px;flex-shrink:0}
+.install-text{flex:1}
+.install-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:3px}
+.install-sub{font-size:12px;color:var(--text2)}
+.install-btns{display:flex;gap:8px;flex-shrink:0}
+.btn-install{
+  background:var(--accent);color:#0d1117;
+  font-family:'Syne',sans-serif;font-weight:700;font-size:13px;
+  padding:10px 16px;border:none;border-radius:10px;cursor:pointer;
+  white-space:nowrap;
+}
+.btn-dismiss{
+  background:var(--bg3);color:var(--text2);
+  font-size:13px;padding:10px 12px;border:1px solid var(--border);
+  border-radius:10px;cursor:pointer;
+}
+
+/* ===== HEADER ===== */
+header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(13,17,23,0.9);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:0 20px;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{
+  width:34px;height:34px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-radius:9px;
+  display:flex;align-items:center;justify-content:center;font-size:17px;
+}
+.logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.5px}
+.logo-text span{color:var(--accent)}
+
+/* Language switcher */
+.lang-switch{
+  display:flex;gap:2px;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:10px;padding:3px;
+}
+.lang-btn{
+  background:none;border:none;
+  color:var(--text3);font-size:12px;font-weight:600;
+  padding:5px 10px;border-radius:7px;cursor:pointer;
+  transition:all 0.2s;letter-spacing:0.5px;
+}
+.lang-btn.active{background:var(--card);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.4)}
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:rgba(13,17,23,0.95);
+  backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  display:flex;
+  padding:8px 0 calc(8px + var(--safe-bottom));
+  z-index:90;
+}
+.nav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:6px 4px;cursor:pointer;background:none;border:none;color:var(--text3);
+  font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;
+  transition:color 0.2s;
+}
+.nav-item.active{color:var(--accent)}
+.nav-icon{font-size:20px;line-height:1}
+
+/* ===== PAGES ===== */
+.page{display:none;animation:fadeUp 0.35s ease both}
+.page.active{display:block}
+
+main{
+  position:relative;z-index:1;
+  max-width:680px;margin:0 auto;
+  padding:24px 16px 100px;
+}
+
+/* ===== HERO ===== */
+.hero{text-align:center;padding:32px 0 28px;animation:fadeUp 0.5s ease both}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(124,106,247,0.12);
+  border:1px solid rgba(124,106,247,0.25);
+  color:#a89cf7;font-size:12px;
+  padding:5px 13px;border-radius:20px;margin-bottom:18px;
+}
+.hero h1{
+  font-family:'Syne',sans-serif;font-weight:800;
+  font-size:clamp(26px,6vw,38px);line-height:1.1;
+  letter-spacing:-1px;margin-bottom:12px;
+}
+.hero h1 .accent{color:var(--accent)}
+.hero p{color:var(--text2);font-size:15px;line-height:1.6;max-width:440px;margin:0 auto;font-weight:300}
+
+/* ===== CARDS ===== */
+.card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:22px;margin-bottom:16px;
+  transition:border-color 0.3s;
+}
+.card:hover{border-color:var(--border2)}
+.card-label{
+  font-family:'Syne',sans-serif;font-weight:700;font-size:12px;
+  letter-spacing:1px;text-transform:uppercase;color:var(--text2);
+  margin-bottom:14px;display:flex;align-items:center;gap:8px;
+}
+.card-label::before{content:'';width:3px;height:13px;background:var(--accent);border-radius:2px;display:inline-block}
+
+/* ===== TABS ===== */
+.input-tabs{
+  display:flex;gap:3px;background:var(--bg3);
+  border-radius:var(--radius-sm);padding:3px;margin-bottom:16px;
+}
+.tab-btn{
+  flex:1;background:none;border:none;color:var(--text2);
+  font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;
+  padding:9px 8px;border-radius:7px;cursor:pointer;transition:all 0.2s;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.tab-btn.active{background:var(--card);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.3)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* ===== UPLOAD ===== */
+.upload-area{
+  border:2px dashed rgba(0,212,170,0.2);border-radius:var(--radius-sm);
+  padding:32px 16px;text-align:center;cursor:pointer;
+  transition:all 0.3s;position:relative;background:rgba(0,212,170,0.02);
+}
+.upload-area:hover,.upload-area.drag-over{border-color:rgba(0,212,170,0.5);background:rgba(0,212,170,0.05)}
+.upload-area input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{font-size:36px;margin-bottom:10px;display:block}
+.upload-text{font-size:14px;color:var(--text2);margin-bottom:4px}
+.upload-text strong{color:var(--accent)}
+.upload-hint{font-size:11px;color:var(--text3);margin-top:6px}
+#preview-container{display:none;position:relative;margin-top:14px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border)}
+#preview-img{width:100%;max-height:220px;object-fit:cover;display:block}
+.preview-overlay{position:absolute;top:8px;right:8px}
+.preview-btn{
+  background:rgba(13,17,23,0.85);backdrop-filter:blur(8px);
+  border:1px solid var(--border2);color:var(--accent3);
+  font-size:12px;padding:6px 12px;border-radius:8px;cursor:pointer;
+}
+
+/* ===== TEXTAREA ===== */
+textarea.course-input{
+  width:100%;background:var(--bg3);border:1px solid var(--border);
+  border-radius:var(--radius-sm);color:var(--text);
+  font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.6;
+  padding:14px;resize:vertical;min-height:130px;outline:none;transition:border-color 0.2s;
+}
+textarea.course-input:focus{border-color:rgba(0,212,170,0.4)}
+textarea.course-input::placeholder{color:var(--text3)}
+
+/* ===== SUBJECTS ===== */
+.subject-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.subject-pill{
+  background:var(--bg3);border:1px solid var(--border);color:var(--text2);
+  font-size:12px;font-weight:500;padding:7px 13px;border-radius:20px;
+  cursor:pointer;transition:all 0.2s;
+}
+.subject-pill:hover{border-color:var(--border2);color:var(--text)}
+.subject-pill.selected{background:rgba(0,212,170,0.1);border-color:rgba(0,212,170,0.4);color:var(--accent)}
+
+/* ===== API KEY ===== */
+.api-section{
+  background:rgba(255,190,69,0.05);border:1px solid rgba(255,190,69,0.15);
+  border-radius:var(--radius-sm);padding:14px;margin-top:14px;
+}
+.api-label{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--warning);margin-bottom:8px;font-weight:500}
+.api-row{display:flex;gap:8px;margin-bottom:4px}
+.api-input{
+  flex:1;background:var(--bg3);border:1px solid var(--border);
+  border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;
+  font-size:13px;padding:9px 13px;outline:none;transition:border-color 0.2s;
+}
+.api-input:focus{border-color:rgba(255,190,69,0.4)}
+.api-link{color:var(--accent);font-size:11px;display:block;margin-top:5px;text-decoration:none}
+.api-link:hover{text-decoration:underline}
+
+/* ===== YOUTUBE KEY ===== */
+.yt-section{
+  background:rgba(255,107,107,0.05);border:1px solid rgba(255,107,107,0.15);
+  border-radius:var(--radius-sm);padding:14px;margin-top:10px;
+}
+.yt-label{display:flex;align-items:center;gap:7px;font-size:12px;color:#ff9999;margin-bottom:8px;font-weight:500}
+
+/* ===== CTA ===== */
+.cta-btn{
+  width:100%;
+  background:linear-gradient(135deg,var(--accent),#00b899);
+  color:#0d1117;font-family:'Syne',sans-serif;font-weight:700;
+  font-size:15px;padding:15px;border:none;border-radius:var(--radius-sm);
+  cursor:pointer;margin-top:18px;transition:all 0.25s;
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  position:relative;overflow:hidden;
+}
+.cta-btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,212,170,0.25)}
+.cta-btn:active{transform:translateY(0)}
+.cta-btn:disabled{background:var(--bg3);color:var(--text3);cursor:not-allowed;transform:none;box-shadow:none}
+
+/* ===== ERROR ===== */
+.error-card{
+  display:none;background:rgba(255,107,107,0.05);
+  border:1px solid rgba(255,107,107,0.2);border-radius:var(--radius-sm);
+  padding:14px;margin-top:10px;font-size:13px;color:#ff9999;line-height:1.5;
+}
+.error-card.visible{display:block}
+
+/* ===== LOADING ===== */
+.loading-section{display:none;text-align:center;padding:48px 16px;animation:fadeUp 0.4s ease both}
+.loading-section.visible{display:block}
+.loading-orb{width:68px;height:68px;margin:0 auto 22px;position:relative}
+.orb-ring{position:absolute;inset:0;border-radius:50%;border:2px solid transparent;animation:spin 1.5s linear infinite}
+.orb-ring:nth-child(1){border-top-color:var(--accent);animation-duration:1.5s}
+.orb-ring:nth-child(2){inset:8px;border-top-color:var(--accent2);animation-duration:1.2s;animation-direction:reverse}
+.orb-center{position:absolute;inset:20px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:50%;animation:pulse 1.5s ease-in-out infinite}
+.loading-steps{display:flex;flex-direction:column;gap:9px;max-width:280px;margin:0 auto;text-align:left}
+.loading-step{display:flex;align-items:center;gap:11px;padding:11px 14px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;color:var(--text3);transition:all 0.4s}
+.loading-step.active{color:var(--text);border-color:rgba(0,212,170,0.3)}
+.loading-step.done{color:var(--accent)}
+.step-dot{width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background 0.4s}
+.loading-step.active .step-dot{background:var(--accent);animation:pulse 1s infinite}
+.loading-step.done .step-dot{background:var(--accent)}
+
+/* ===== RESULTS ===== */
+.results-section{display:none;animation:fadeUp 0.4s ease both}
+.results-section.visible{display:block}
+
+.analysis-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+.analysis-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:10px;flex-wrap:wrap}
+.subject-badge{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:20px;font-size:12px;font-weight:500}
+.difficulty-badge{font-size:11px;padding:4px 10px;border-radius:10px;background:rgba(255,190,69,0.1);border:1px solid rgba(255,190,69,0.25);color:var(--warning);white-space:nowrap}
+.analysis-summary{font-size:14px;line-height:1.7;color:var(--text2);margin-bottom:14px}
+.key-concepts{display:flex;flex-wrap:wrap;gap:6px}
+.concept-tag{background:rgba(124,106,247,0.1);border:1px solid rgba(124,106,247,0.2);color:#a89cf7;font-size:11px;padding:4px 10px;border-radius:7px}
+
+.section-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+
+.exercises-grid{display:flex;flex-direction:column;gap:11px;margin-bottom:22px}
+.exercise-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color 0.2s}
+.exercise-card:hover{border-color:var(--border2)}
+.exercise-header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.exercise-num{background:rgba(0,212,170,0.1);border:1px solid rgba(0,212,170,0.2);color:var(--accent);font-family:'Syne',sans-serif;font-weight:700;font-size:11px;width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.exercise-question{flex:1;font-size:13px;font-weight:500;margin:0 12px;line-height:1.4}
+.exercise-toggle{color:var(--text3);font-size:16px;transition:transform 0.3s;flex-shrink:0}
+.exercise-card.open .exercise-toggle{transform:rotate(180deg)}
+.exercise-body{display:none;padding:0 18px 16px;border-top:1px solid var(--border)}
+.exercise-card.open .exercise-body{display:block}
+.exercise-correction{background:rgba(0,212,170,0.05);border:1px solid rgba(0,212,170,0.15);border-radius:var(--radius-sm);padding:12px 14px;margin-top:10px;font-size:13px;line-height:1.7;color:var(--text2)}
+.correction-label{font-size:10px;font-weight:600;letter-spacing:1px;color:var(--accent);text-transform:uppercase;margin-bottom:6px}
+
+/* ===== VIDEOS ===== */
+.videos-grid{display:flex;flex-direction:column;gap:10px;margin-bottom:22px}
+.video-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);display:flex;align-items:center;gap:14px;
+  padding:12px 16px;cursor:pointer;transition:all 0.2s;text-decoration:none;color:inherit;
+}
+.video-card:hover{border-color:rgba(255,107,107,0.3);background:var(--bg3);transform:translateX(2px)}
+.video-thumb{
+  width:72px;height:48px;background:var(--bg3);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  overflow:hidden;position:relative;
+}
+.video-thumb img{width:100%;height:100%;object-fit:cover;border-radius:8px}
+.video-thumb-placeholder{font-size:24px}
+.play-over{position:absolute;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;border-radius:8px;opacity:0;transition:opacity 0.2s}
+.video-card:hover .play-over{opacity:1}
+.play-icon-sm{width:22px;height:22px;background:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;padding-left:2px;color:#000}
+.video-info{flex:1;min-width:0}
+.video-title{font-size:13px;font-weight:500;margin-bottom:4px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.video-meta{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text3)}
+.video-channel{color:var(--text2);font-size:11px}
+.yt-badge{display:flex;align-items:center;gap:3px;color:#ff4444;font-size:11px;font-weight:600}
+.video-duration{background:var(--bg3);padding:2px 6px;border-radius:5px;font-size:10px;font-weight:500}
+
+.recap-card{background:linear-gradient(135deg,rgba(0,212,170,0.07),rgba(124,106,247,0.07));border:1px solid rgba(0,212,170,0.18);border-radius:var(--radius);padding:20px;margin-bottom:18px}
+.recap-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;margin-bottom:12px;color:var(--accent)}
+.recap-points{display:flex;flex-direction:column;gap:7px}
+.recap-point{display:flex;align-items:flex-start;gap:9px;font-size:13px;line-height:1.5;color:var(--text2)}
+.recap-bullet{width:5px;height:5px;border-radius:50%;background:var(--accent);margin-top:7px;flex-shrink:0}
+
+.new-btn{
+  display:flex;align-items:center;justify-content:center;gap:7px;width:100%;
+  background:var(--card);border:1px solid var(--border);color:var(--text2);
+  font-family:'DM Sans',sans-serif;font-size:14px;padding:13px;
+  border-radius:var(--radius-sm);cursor:pointer;transition:all 0.2s;
+}
+.new-btn:hover{border-color:var(--border2);color:var(--text)}
+
+/* ===== HISTORY PAGE ===== */
+.history-empty{text-align:center;padding:60px 20px;color:var(--text3)}
+.history-empty .empty-icon{font-size:48px;margin-bottom:16px}
+.history-empty p{font-size:14px;line-height:1.6}
+.history-grid{display:flex;flex-direction:column;gap:12px}
+.history-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px 18px;cursor:pointer;
+  transition:all 0.2s;display:flex;align-items:center;gap:14px;
+}
+.history-card:hover{border-color:var(--border2);transform:translateX(2px)}
+.history-card-icon{font-size:28px;flex-shrink:0}
+.history-card-info{flex:1;min-width:0}
+.history-card-title{font-size:14px;font-weight:500;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.history-card-meta{font-size:11px;color:var(--text3);display:flex;gap:10px}
+.history-card-del{
+  background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;
+  padding:6px;border-radius:7px;transition:all 0.2s;flex-shrink:0;
+}
+.history-card-del:hover{color:var(--accent3);background:rgba(255,107,107,0.1)}
+.history-badge{
+  font-size:10px;padding:2px 8px;border-radius:8px;font-weight:500;
+  background:rgba(0,212,170,0.1);border:1px solid rgba(0,212,170,0.2);color:var(--accent);
+  white-space:nowrap;
+}
+
+/* ===== SETTINGS PAGE ===== */
+.settings-section{margin-bottom:24px}
+.settings-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin-bottom:10px;padding:0 2px}
+.setting-row{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:8px;
+  display:flex;align-items:center;gap:12px;
+}
+.setting-icon{font-size:20px;flex-shrink:0}
+.setting-info{flex:1}
+.setting-label{font-size:14px;font-weight:500;margin-bottom:2px}
+.setting-desc{font-size:11px;color:var(--text3);line-height:1.4}
+.setting-input{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;
+  font-size:13px;padding:8px 12px;outline:none;width:100%;margin-top:8px;
+  transition:border-color 0.2s;
+}
+.setting-input:focus{border-color:rgba(0,212,170,0.4)}
+.setting-save{
+  background:var(--accent);color:#0d1117;font-family:'Syne',sans-serif;
+  font-weight:700;font-size:13px;padding:9px 18px;border:none;
+  border-radius:8px;cursor:pointer;margin-top:8px;transition:all 0.2s;
+}
+.setting-save:hover{opacity:0.9}
+.setting-saved{display:none;font-size:11px;color:var(--accent);margin-top:6px}
+.setting-saved.show{display:block}
+.danger-btn{
+  width:100%;background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.2);
+  color:#ff9999;font-family:'DM Sans',sans-serif;font-size:14px;
+  padding:13px;border-radius:var(--radius-sm);cursor:pointer;transition:all 0.2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.danger-btn:hover{background:rgba(255,107,107,0.15)}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center}
+.stat-num{font-family:'Syne',sans-serif;font-weight:800;font-size:24px;color:var(--accent);margin-bottom:4px}
+.stat-label{font-size:11px;color:var(--text3)}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.7;transform:scale(0.95)}}
+
+.results-section>*{animation:fadeUp 0.35s ease both}
+.results-section>*:nth-child(1){animation-delay:0.04s}
+.results-section>*:nth-child(2){animation-delay:0.08s}
+.results-section>*:nth-child(3){animation-delay:0.12s}
+.results-section>*:nth-child(4){animation-delay:0.16s}
+.results-section>*:nth-child(5){animation-delay:0.20s}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+@media(max-width:400px){
+  header{padding:0 14px}
+  main{padding:18px 12px 90px}
+  .stats-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- INSTALL BANNER -->
+<div id="install-banner">
+  <div class="install-icon">📱</div>
+  <div class="install-text">
+    <div class="install-title" id="install-title">Installer MahaLetra</div>
+    <div class="install-sub" id="install-sub">Ajoute l'app sur ton écran d'accueil</div>
+  </div>
+  <div class="install-btns">
+    <button class="btn-install" id="install-btn" onclick="installApp()">Installer</button>
+    <button class="btn-dismiss" onclick="dismissInstall()">✕</button>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">📚</div>
+    <div class="logo-text">Maha<span>Letra</span></div>
+  </div>
+  <div class="lang-switch">
+    <button class="lang-btn active" onclick="setLang('fr')">FR</button>
+    <button class="lang-btn" onclick="setLang('mg')">MG</button>
+  </div>
+</header>
+
+<!-- PAGES -->
+<div id="page-home" class="page active">
+  <main>
+    <div class="hero">
+      <div class="hero-eyebrow" id="txt-eyebrow">✨ Propulsé par l'intelligence artificielle</div>
+      <h1 id="txt-hero-title">Révise plus vite,<br>retiens <span class="accent">vraiment</span></h1>
+      <p id="txt-hero-sub">Prends en photo ton cours ou colle ton texte — l'IA analyse, génère des exercices corrigés et trouve les meilleures vidéos.</p>
+    </div>
+
+    <!-- Scan section -->
+    <div id="scan-section">
+      <div class="card">
+        <div class="input-tabs">
+          <button class="tab-btn active" onclick="switchTab('photo')" id="tab-btn-photo">📷 Photo</button>
+          <button class="tab-btn" onclick="switchTab('text')" id="tab-btn-text">✏️ Texte</button>
+        </div>
+
+        <div class="tab-content active" id="tab-photo">
+          <div class="upload-area" id="upload-area"
+            ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+            <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleFileSelect(event)">
+            <span class="upload-icon">📷</span>
+            <div class="upload-text" id="txt-upload-main"><strong>Appuie pour prendre une photo</strong></div>
+            <div class="upload-text" style="font-size:12px;margin-top:4px" id="txt-upload-sub">ou glisse une image ici</div>
+            <div class="upload-hint">JPG, PNG — Max 10 MB</div>
+          </div>
+          <div id="preview-container">
+            <img id="preview-img" src="" alt="Aperçu">
+            <div class="preview-overlay">
+              <button class="preview-btn" onclick="clearImage()">✕ Supprimer</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="tab-text">
+          <textarea class="course-input" id="course-text" id="txt-placeholder"
+            placeholder="Colle ou tape ici le contenu de ton cours…"></textarea>
+        </div>
+
+        <div class="card-label" style="margin-top:18px" id="txt-subject-label">Matière (optionnel)</div>
+        <div class="subject-row" id="subject-row">
+          <button class="subject-pill" onclick="toggleSubject(this,'Mathématiques')">📐 Maths</button>
+          <button class="subject-pill" onclick="toggleSubject(this,'Physique-Chimie')">⚗️ Physique</button>
+          <button class="subject-pill" onclick="toggleSubject(this,'SVT')">🌿 SVT</button>
+          <button class="subject-pill" onclick="toggleSubject(this,'Histoire-Géo')">🌍 Histoire</button>
+          <button class="subject-pill" onclick="toggleSubject(this,'Français')">📖 Français</button>
+          <button class="subject-pill" onclick="toggleSubject(this,'Philosophie')">💭 Philo</button>
+          <button class="subject-pill" onclick="toggleSubject(this,'Économie')">📊 Éco</button>
+        </div>
+
+        <!-- Gemini API Key -->
+        <div class="api-section">
+          <div class="api-label">🔑 <span id="txt-gemini-label">Clé API Gemini (gratuite)</span></div>
+          <div class="api-row">
+            <input class="api-input" type="password" id="gemini-key" placeholder="AIzaSy..." oninput="saveApiKeys()">
+          </div>
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" class="api-link" id="txt-gemini-link">→ Obtenir ta clé gratuite sur Google AI Studio (2 min)</a>
+        </div>
+
+        <!-- YouTube API Key -->
+        <div class="yt-section">
+          <div class="yt-label">▶ <span id="txt-yt-label">Clé API YouTube (optionnelle — pour de vraies vidéos)</span></div>
+          <div class="api-row">
+            <input class="api-input" type="password" id="yt-key" placeholder="AIzaSy..." oninput="saveApiKeys()">
+          </div>
+          <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" class="api-link" id="txt-yt-link">→ Activer YouTube Data API v3 (gratuit)</a>
+        </div>
+
+        <div id="error-msg" class="error-card"></div>
+
+        <button class="cta-btn" id="analyze-btn" onclick="analyzeContent()">
+          <span>🔍</span> <span id="txt-cta">Analyser mon cours</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-section" id="loading-section">
+      <div class="loading-orb">
+        <div class="orb-ring"></div>
+        <div class="orb-ring"></div>
+        <div class="orb-center"></div>
+      </div>
+      <p style="color:var(--text2);margin-bottom:18px;font-size:14px" id="txt-loading">Analyse en cours…</p>
+      <div class="loading-steps">
+        <div class="loading-step active" id="step-1"><div class="step-dot"></div><span id="s1">Lecture du cours</span></div>
+        <div class="loading-step" id="step-2"><div class="step-dot"></div><span id="s2">Identification des concepts</span></div>
+        <div class="loading-step" id="step-3"><div class="step-dot"></div><span id="s3">Génération des exercices</span></div>
+        <div class="loading-step" id="step-4"><div class="step-dot"></div><span id="s4">Recherche de vidéos</span></div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="results-section" id="results-section"></div>
+  </main>
+</div>
+
+<!-- HISTORY PAGE -->
+<div id="page-history" class="page">
+  <main>
+    <div class="hero" style="padding:24px 0 20px">
+      <h1 style="font-size:26px" id="txt-hist-title">Mes révisions</h1>
+      <p id="txt-hist-sub" style="margin-top:8px">Retrouve tous tes cours analysés</p>
+    </div>
+    <div id="history-content"></div>
+  </main>
+</div>
+
+<!-- SETTINGS PAGE -->
+<div id="page-settings" class="page">
+  <main>
+    <div class="hero" style="padding:24px 0 20px">
+      <h1 style="font-size:26px" id="txt-settings-title">Paramètres</h1>
+    </div>
+
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label" id="txt-stat-total">Analyses</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-exo">0</div><div class="stat-label" id="txt-stat-exo">Exercices</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-vid">0</div><div class="stat-label" id="txt-stat-vid">Vidéos</div></div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-title" id="txt-api-section">Clés API</div>
+      <div class="setting-row">
+        <div class="setting-icon">🔑</div>
+        <div class="setting-info" style="flex:1">
+          <div class="setting-label">Google Gemini</div>
+          <div class="setting-desc" id="txt-gemini-desc">Requis pour analyser tes cours</div>
+          <input class="setting-input" type="password" id="s-gemini-key" placeholder="AIzaSy..." oninput="syncKeys()">
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" class="api-link">→ Obtenir gratuitement</a>
+        </div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-icon">▶</div>
+        <div class="setting-info" style="flex:1">
+          <div class="setting-label">YouTube Data API</div>
+          <div class="setting-desc" id="txt-yt-desc">Optionnelle — pour de vraies miniatures</div>
+          <input class="setting-input" type="password" id="s-yt-key" placeholder="AIzaSy..." oninput="syncKeys()">
+          <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" class="api-link">→ Activer gratuitement</a>
+        </div>
+      </div>
+      <button class="setting-save" onclick="saveFromSettings()" id="txt-save-btn">Enregistrer</button>
+      <div class="setting-saved" id="save-confirm" id="txt-saved">✓ Enregistré !</div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-title" id="txt-danger-section">Données</div>
+      <button class="danger-btn" onclick="clearAllHistory()" id="txt-clear-btn">🗑️ Effacer tout l'historique</button>
+    </div>
+  </main>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="goPage('home')" id="nav-home">
+    <span class="nav-icon">🏠</span>
+    <span id="txt-nav-home">Accueil</span>
+  </button>
+  <button class="nav-item" onclick="goPage('history')" id="nav-history">
+    <span class="nav-icon">📋</span>
+    <span id="txt-nav-hist">Historique</span>
+  </button>
+  <button class="nav-item" onclick="goPage('settings')" id="nav-settings">
+    <span class="nav-icon">⚙️</span>
+    <span id="txt-nav-set">Paramètres</span>
+  </button>
+</nav>
+
+<script>
+// ============================================================
+//  STATE
+// ============================================================
+let lang = localStorage.getItem('ml_lang') || 'fr';
+let selectedSubject = '';
+let selectedImageBase64 = null;
+let activeTab = 'photo';
+let deferredPrompt = null;
+let currentResult = null;
+
+// ============================================================
+//  TRANSLATIONS
+// ============================================================
+const T = {
+  fr: {
+    eyebrow: '✨ Propulsé par l\'intelligence artificielle',
+    heroTitle: 'Révise plus vite,<br>retiens <span class="accent">vraiment</span>',
+    heroSub: 'Prends en photo ton cours ou colle ton texte — l\'IA analyse, génère des exercices corrigés et trouve les meilleures vidéos.',
+    uploadMain: '<strong>Appuie pour prendre une photo</strong>',
+    uploadSub: 'ou glisse une image ici',
+    subjectLabel: 'Matière (optionnel)',
+    geminiLabel: 'Clé API Gemini (gratuite)',
+    geminiLink: '→ Obtenir ta clé gratuite sur Google AI Studio (2 min)',
+    ytLabel: 'Clé API YouTube (optionnelle — pour de vraies vidéos)',
+    ytLink: '→ Activer YouTube Data API v3 (gratuit)',
+    cta: 'Analyser mon cours',
+    loading: 'Analyse en cours…',
+    s1: 'Lecture du cours', s2: 'Identification des concepts',
+    s3: 'Génération des exercices', s4: 'Recherche de vidéos',
+    histTitle: 'Mes révisions', histSub: 'Retrouve tous tes cours analysés',
+    histEmpty: 'Aucune révision sauvegardée.<br>Analyse ton premier cours !',
+    settingsTitle: 'Paramètres',
+    apiSection: 'Clés API',
+    geminiDesc: 'Requis pour analyser tes cours',
+    ytDesc: 'Optionnelle — pour de vraies miniatures',
+    saveBtn: 'Enregistrer', saved: '✓ Enregistré !',
+    dangerSection: 'Données', clearBtn: '🗑️ Effacer tout l\'historique',
+    statTotal: 'Analyses', statExo: 'Exercices', statVid: 'Vidéos',
+    navHome: 'Accueil', navHist: 'Historique', navSet: 'Paramètres',
+    installTitle: 'Installer MahaLetra', installSub: 'Ajoute l\'app sur ton écran d\'accueil',
+    sectionExo: '✏️ Exercices corrigés', sectionVid: '🎬 Vidéos recommandées',
+    sectionRecap: '📌 Points essentiels à retenir',
+    newBtn: '↩ Analyser un autre cours',
+    correctionLabel: '✓ Correction',
+    ytSearch: 'Rechercher sur YouTube →',
+    errKey: '⚠️ Entre ta clé API Gemini gratuite.',
+    errPhoto: '⚠️ Prends ou sélectionne d\'abord une photo.',
+    errText: '⚠️ Colle au moins quelques lignes de cours.',
+    tabPhoto: '📷 Photo', tabText: '✏️ Texte',
+  },
+  mg: {
+    eyebrow: '✨ Nohezarin\'ny angovo artifisialy',
+    heroTitle: 'Mamerina haingana,<br>tsarovy <span class="accent">tsara</span>',
+    heroSub: 'Sary ny lesona na soraty ny lahatsoratra — ny AI mamaky, mamorona fanaovana ary mitady video tsara indrindra.',
+    uploadMain: '<strong>Tsindrio haka sary lesona</strong>',
+    uploadSub: 'na seret\'ity sary ity eto',
+    subjectLabel: 'Lohahevitra (tsy voatery)',
+    geminiLabel: 'Fanalahidy API Gemini (maimaim-poana)',
+    geminiLink: '→ Alao ny fanalahidinao maimaimpoana ao Google AI Studio (2 min)',
+    ytLabel: 'Fanalahidy API YouTube (tsy voatery)',
+    ytLink: '→ Alefa maimaim-poana YouTube Data API v3',
+    cta: 'Hamakiako ny lesona',
+    loading: 'Amakiako...',
+    s1: 'Mamaky lesona', s2: 'Mahita ny hevitra lehibe',
+    s3: 'Mamorona fanazaran-tena', s4: 'Mitady video',
+    histTitle: 'Ny fanadihadiana', histSub: 'Hitanao ny lesona rehetra',
+    histEmpty: 'Tsy misy lesona voatahiry.<br>Analizy ny lesonao voalohany!',
+    settingsTitle: 'Fikirana',
+    apiSection: 'Fanalahidy API',
+    geminiDesc: 'Ilaina ny hamakiana ny lesonao',
+    ytDesc: 'Tsy voatery — ho an\'ny sary miniatura',
+    saveBtn: 'Tehirizo', saved: '✓ Voatahiry!',
+    dangerSection: 'Angona', clearBtn: '🗑️ Hamafa ny tantara rehetra',
+    statTotal: 'Fanadihadiana', statExo: 'Fanazarana', statVid: 'Video',
+    navHome: 'Fandraisana', navHist: 'Tantara', navSet: 'Fikirana',
+    installTitle: 'Mametraka MahaLetra', installSub: 'Ampio eo amin\'ny sehatrao ny application',
+    sectionExo: '✏️ Fanazaran-tena voafehy', sectionVid: '🎬 Video nolokoina',
+    sectionRecap: '📌 Teboka manan-danja',
+    newBtn: '↩ Hamakiana lesona hafa',
+    correctionLabel: '✓ Famaliana',
+    ytSearch: 'Mitady ao YouTube →',
+    errKey: '⚠️ Asio ny fanalahidy API Gemini maimaim-poana.',
+    errPhoto: '⚠️ Alao sary lesona aloha.',
+    errText: '⚠️ Kopy ny andininy vitsivitsy aloha.',
+    tabPhoto: '📷 Sary', tabText: '✏️ Lahatsoratra',
+  }
+};
+
+function t(key) { return T[lang][key] || T['fr'][key] || key; }
+
+function setLang(l) {
+  lang = l;
+  localStorage.setItem('ml_lang', l);
+  document.querySelectorAll('.lang-btn').forEach((b,i) => b.classList.toggle('active', (i===0&&l==='fr')||(i===1&&l==='mg')));
+  applyTranslations();
+}
+
+function applyTranslations() {
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.innerHTML = val; };
+  set('txt-eyebrow', t('eyebrow'));
+  set('txt-hero-title', t('heroTitle'));
+  set('txt-hero-sub', t('heroSub'));
+  set('txt-upload-main', t('uploadMain'));
+  set('txt-upload-sub', t('uploadSub'));
+  set('txt-subject-label', t('subjectLabel'));
+  set('txt-gemini-label', t('geminiLabel'));
+  set('txt-gemini-link', t('geminiLink'));
+  set('txt-yt-label', t('ytLabel'));
+  set('txt-yt-link', t('ytLink'));
+  set('txt-cta', t('cta'));
+  set('txt-loading', t('loading'));
+  set('s1', t('s1')); set('s2', t('s2')); set('s3', t('s3')); set('s4', t('s4'));
+  set('txt-hist-title', t('histTitle')); set('txt-hist-sub', t('histSub'));
+  set('txt-settings-title', t('settingsTitle'));
+  set('txt-api-section', t('apiSection'));
+  set('txt-gemini-desc', t('geminiDesc')); set('txt-yt-desc', t('ytDesc'));
+  set('txt-save-btn', t('saveBtn')); set('txt-saved', t('saved'));
+  set('txt-danger-section', t('dangerSection')); set('txt-clear-btn', t('clearBtn'));
+  set('txt-stat-total', t('statTotal')); set('txt-stat-exo', t('statExo')); set('txt-stat-vid', t('statVid'));
+  set('txt-nav-home', t('navHome')); set('txt-nav-hist', t('navHist')); set('txt-nav-set', t('navSet'));
+  set('install-title', t('installTitle')); set('install-sub', t('installSub'));
+  set('tab-btn-photo', t('tabPhoto')); set('tab-btn-text', t('tabText'));
+}
+
+// ============================================================
+//  PWA
+// ============================================================
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const dismissed = localStorage.getItem('ml_install_dismissed');
+  if (!dismissed) {
+    setTimeout(() => document.getElementById('install-banner').classList.add('show'), 3000);
+  }
+});
+
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(r => {
+      if (r.outcome === 'accepted') document.getElementById('install-banner').classList.remove('show');
+      deferredPrompt = null;
+    });
+  }
+}
+
+function dismissInstall() {
+  document.getElementById('install-banner').classList.remove('show');
+  localStorage.setItem('ml_install_dismissed', '1');
+}
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('install-banner').classList.remove('show');
+});
+
+// ============================================================
+//  NAVIGATION
+// ============================================================
+function goPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.getElementById('nav-' + (page === 'home' ? 'home' : page === 'history' ? 'history' : 'settings')).classList.add('active');
+  if (page === 'history') renderHistory();
+  if (page === 'settings') renderSettings();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ============================================================
+//  TABS
+// ============================================================
+function switchTab(tab) {
+  activeTab = tab;
+  const btns = document.querySelectorAll('.tab-btn');
+  btns[0].classList.toggle('active', tab === 'photo');
+  btns[1].classList.toggle('active', tab === 'text');
+  document.getElementById('tab-photo').classList.toggle('active', tab === 'photo');
+  document.getElementById('tab-text').classList.toggle('active', tab === 'text');
+}
+
+function toggleSubject(el, subject) {
+  document.querySelectorAll('.subject-pill').forEach(p => p.classList.remove('selected'));
+  selectedSubject = (selectedSubject === subject) ? '' : subject;
+  if (selectedSubject) el.classList.add('selected');
+}
+
+// ============================================================
+//  FILE HANDLING
+// ============================================================
+function handleDragOver(e) { e.preventDefault(); document.getElementById('upload-area').classList.add('drag-over'); }
+function handleDragLeave() { document.getElementById('upload-area').classList.remove('drag-over'); }
+function handleDrop(e) { e.preventDefault(); document.getElementById('upload-area').classList.remove('drag-over'); const f=e.dataTransfer.files[0]; if(f&&f.type.startsWith('image/')) processFile(f); }
+function handleFileSelect(e) { const f=e.target.files[0]; if(f) processFile(f); }
+function processFile(file) {
+  const r = new FileReader();
+  r.onload = e => {
+    const url = e.target.result;
+    selectedImageBase64 = url.split(',')[1];
+    document.getElementById('preview-img').src = url;
+    document.getElementById('preview-container').style.display = 'block';
+    document.getElementById('upload-area').style.display = 'none';
+  };
+  r.readAsDataURL(file);
+}
+function clearImage() {
+  selectedImageBase64 = null;
+  document.getElementById('preview-container').style.display = 'none';
+  document.getElementById('upload-area').style.display = 'block';
+  document.getElementById('file-input').value = '';
+}
+
+// ============================================================
+//  API KEYS SYNC
+// ============================================================
+function saveApiKeys() {
+  const gk = document.getElementById('gemini-key').value;
+  const yk = document.getElementById('yt-key').value;
+  if(gk) localStorage.setItem('ml_gemini', gk);
+  if(yk) localStorage.setItem('ml_yt', yk);
+  document.getElementById('s-gemini-key').value = gk;
+  document.getElementById('s-yt-key').value = yk;
+}
+function syncKeys() {
+  const gk = document.getElementById('s-gemini-key').value;
+  const yk = document.getElementById('s-yt-key').value;
+  document.getElementById('gemini-key').value = gk;
+  document.getElementById('yt-key').value = yk;
+  if(gk) localStorage.setItem('ml_gemini', gk);
+  if(yk) localStorage.setItem('ml_yt', yk);
+}
+function saveFromSettings() {
+  syncKeys();
+  const c = document.getElementById('save-confirm');
+  c.classList.add('show');
+  setTimeout(()=>c.classList.remove('show'), 2500);
+}
+function loadApiKeys() {
+  const gk = localStorage.getItem('ml_gemini') || '';
+  const yk = localStorage.getItem('ml_yt') || '';
+  document.getElementById('gemini-key').value = gk;
+  document.getElementById('yt-key').value = yk;
+  document.getElementById('s-gemini-key').value = gk;
+  document.getElementById('s-yt-key').value = yk;
+}
+
+// ============================================================
+//  LOADING
+// ============================================================
+function showLoading() {
+  document.getElementById('scan-section').style.display = 'none';
+  document.getElementById('results-section').classList.remove('visible');
+  document.getElementById('results-section').innerHTML = '';
+  document.getElementById('loading-section').classList.add('visible');
+  ['step-1','step-2','step-3','step-4'].forEach(id => { const el=document.getElementById(id); el.classList.remove('active','done'); });
+  let i = 0;
+  const steps = ['step-1','step-2','step-3','step-4'];
+  const next = () => {
+    if(i>0){document.getElementById(steps[i-1]).classList.remove('active');document.getElementById(steps[i-1]).classList.add('done')}
+    if(i<steps.length){document.getElementById(steps[i]).classList.add('active');i++;setTimeout(next,1300);}
+  };
+  next();
+}
+function hideLoading() { document.getElementById('loading-section').classList.remove('visible'); }
+function showError(msg) {
+  document.getElementById('scan-section').style.display = 'block';
+  hideLoading();
+  const err = document.getElementById('error-msg');
+  err.textContent = msg; err.classList.add('visible');
+}
+
+// ============================================================
+//  ANALYZE
+// ============================================================
+async function analyzeContent() {
+  const apiKey = document.getElementById('gemini-key').value.trim();
+  const courseText = document.getElementById('course-text').value.trim();
+  document.getElementById('error-msg').classList.remove('visible');
+
+  if (!apiKey) { showError(t('errKey')); return; }
+  const hasImage = activeTab==='photo' && selectedImageBase64;
+  const hasText = activeTab==='text' && courseText.length>20;
+  if (!hasImage && !hasText) { showError(activeTab==='photo' ? t('errPhoto') : t('errText')); return; }
+
+  showLoading();
+  try {
+    const result = await callGemini(apiKey, hasImage, courseText);
+    const ytKey = document.getElementById('yt-key').value.trim();
+    const videos = await fetchYouTubeVideos(result.youtube_queries||[], ytKey);
+    result._videos = videos;
+    currentResult = result;
+    saveToHistory(result);
+    renderResults(result);
+  } catch(err) {
+    showError('❌ ' + (err.message||'Erreur API. Vérifie ta clé et ta connexion.'));
+  }
+}
+
+// ============================================================
+//  GEMINI
+// ============================================================
+async function callGemini(apiKey, hasImage, courseText) {
+  const subjectHint = selectedSubject ? `La matière est : ${selectedSubject}.` : 'Détermine la matière toi-même.';
+  const prompt = `Tu es un assistant pédagogique pour lycéens/étudiants malgaches. ${subjectHint}
+Analyse le cours et réponds UNIQUEMENT en JSON valide (pas de markdown).
+{
+  "subject":"matière","topic":"titre (10 mots max)","difficulty":"Facile|Intermédiaire|Difficile",
+  "summary":"résumé 2-3 phrases",
+  "key_concepts":["c1","c2","c3","c4","c5"],
+  "recap_points":["p1","p2","p3","p4"],
+  "exercises":[{"question":"...","answer":"..."},{"question":"...","answer":"..."},{"question":"...","answer":"..."}],
+  "youtube_queries":["requête YouTube en français 1","requête 2","requête 3"]
+}
+${courseText?'Texte du cours :\n'+courseText:''}`;
+
+  const parts = [];
+  if (hasImage) parts.push({inline_data:{mime_type:'image/jpeg',data:selectedImageBase64}});
+  parts.push({text:prompt});
+
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+    {method:'POST',headers:{'Content-Type':'application/json'},
+     body:JSON.stringify({contents:[{parts}]})}
+  );
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||`HTTP ${res.status}`);}
+  const data = await res.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+  const cleaned = text.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+  try{return JSON.parse(cleaned);}catch{
+    const m=cleaned.match(/\{[\s\S]*\}/);
+    if(m)return JSON.parse(m[0]);
+    throw new Error('Réponse IA invalide. Réessaie.');
+  }
+}
+
+// ============================================================
+//  YOUTUBE
+// ============================================================
+async function fetchYouTubeVideos(queries, ytKey) {
+  if (!ytKey || !queries.length) {
+    // Return search links without thumbnails
+    return queries.map(q => ({
+      title: q, channel: '', duration: '', thumbnail: '',
+      url: `https://www.youtube.com/results?search_query=${encodeURIComponent(q+' cours lycée')}`,
+      isSearch: true
+    }));
+  }
+
+  const results = [];
+  for (const q of queries.slice(0,3)) {
+    try {
+      const r = await fetch(
+        `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q+' cours lycée')}&type=video&maxResults=1&relevanceLanguage=fr&key=${ytKey}`
+      );
+      const d = await r.json();
+      const item = d.items?.[0];
+      if (item) {
+        const videoId = item.id.videoId;
+        // Fetch duration
+        let duration = '';
+        try {
+          const vr = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${videoId}&key=${ytKey}`);
+          const vd = await vr.json();
+          const iso = vd.items?.[0]?.contentDetails?.duration||'';
+          duration = formatDuration(iso);
+        } catch{}
+        results.push({
+          title: item.snippet.title,
+          channel: item.snippet.channelTitle,
+          thumbnail: item.snippet.thumbnails?.medium?.url||'',
+          duration,
+          url: `https://www.youtube.com/watch?v=${videoId}`,
+          isSearch: false
+        });
+      }
+    } catch{}
+  }
+
+  // Fill with search links if not enough
+  while(results.length < 3 && queries.length > results.length) {
+    const q = queries[results.length];
+    results.push({title:q,channel:'',duration:'',thumbnail:'',
+      url:`https://www.youtube.com/results?search_query=${encodeURIComponent(q+' cours lycée')}`,isSearch:true});
+  }
+  return results;
+}
+
+function formatDuration(iso) {
+  const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if(!m)return '';
+  const h=parseInt(m[1]||0), min=parseInt(m[2]||0), s=parseInt(m[3]||0);
+  return h>0?`${h}:${String(min).padStart(2,'0')}:${String(s).padStart(2,'0')}`:`${min}:${String(s).padStart(2,'0')}`;
+}
+
+// ============================================================
+//  SUBJECT COLORS
+// ============================================================
+const COLORS = {
+  'Mathématiques':{bg:'rgba(0,212,170,0.1)',border:'rgba(0,212,170,0.3)',color:'#00d4aa'},
+  'Physique-Chimie':{bg:'rgba(124,106,247,0.1)',border:'rgba(124,106,247,0.3)',color:'#a89cf7'},
+  'SVT':{bg:'rgba(0,200,80,0.1)',border:'rgba(0,200,80,0.3)',color:'#00c850'},
+  'Histoire-Géo':{bg:'rgba(255,190,69,0.1)',border:'rgba(255,190,69,0.3)',color:'#ffbe45'},
+  'Français':{bg:'rgba(255,107,107,0.1)',border:'rgba(255,107,107,0.3)',color:'#ff6b6b'},
+  'Philosophie':{bg:'rgba(200,150,255,0.1)',border:'rgba(200,150,255,0.3)',color:'#c896ff'},
+  'Économie':{bg:'rgba(0,180,220,0.1)',border:'rgba(0,180,220,0.3)',color:'#00b4dc'},
+};
+function getColor(subject) { return COLORS[subject]||{bg:'rgba(0,212,170,0.1)',border:'rgba(0,212,170,0.3)',color:'#00d4aa'}; }
+function subjectEmoji(subject) {
+  const m = {'Mathématiques':'📐','Physique-Chimie':'⚗️','SVT':'🌿','Histoire-Géo':'🌍','Français':'📖','Philosophie':'💭','Économie':'📊'};
+  return m[subject]||'📚';
+}
+
+// ============================================================
+//  RENDER RESULTS
+// ============================================================
+function renderResults(data) {
+  hideLoading();
+  const s = getColor(data.subject);
+  const videos = data._videos || [];
+
+  const exHTML = (data.exercises||[]).map((ex,i)=>`
+    <div class="exercise-card" id="ex-${i}">
+      <div class="exercise-header" onclick="toggleEx(${i})">
+        <div class="exercise-num">${i+1}</div>
+        <div class="exercise-question">${esc(ex.question)}</div>
+        <div class="exercise-toggle">▾</div>
+      </div>
+      <div class="exercise-body">
+        <div class="exercise-correction">
+          <div class="correction-label">${t('correctionLabel')}</div>
+          ${esc(ex.answer)}
+        </div>
+      </div>
+    </div>`).join('');
+
+  const vidHTML = videos.map(v=>`
+    <div class="video-card" onclick="window.open('${v.url}','_blank')">
+      <div class="video-thumb">
+        ${v.thumbnail?`<img src="${esc(v.thumbnail)}" alt="" loading="lazy">`:`<span class="video-thumb-placeholder">▶</span>`}
+        <div class="play-over"><div class="play-icon-sm">▶</div></div>
+      </div>
+      <div class="video-info">
+        <div class="video-title">${esc(v.title)}</div>
+        <div class="video-meta">
+          <span class="yt-badge">▶ YouTube</span>
+          ${v.channel?`<span class="video-channel">${esc(v.channel)}</span>`:''}
+          ${v.duration?`<span class="video-duration">${esc(v.duration)}</span>`:`<span style="color:var(--text3);font-size:11px">${t('ytSearch')}</span>`}
+        </div>
+      </div>
+    </div>`).join('');
+
+  const recapHTML = (data.recap_points||[]).map(p=>`
+    <div class="recap-point"><div class="recap-bullet"></div><span>${esc(p)}</span></div>`).join('');
+
+  const conceptsHTML = (data.key_concepts||[]).map(c=>`<span class="concept-tag">${esc(c)}</span>`).join('');
+
+  const el = document.getElementById('results-section');
+  el.innerHTML = `
+    <div class="analysis-card">
+      <div class="analysis-header">
+        <span class="subject-badge" style="background:${s.bg};border:1px solid ${s.border};color:${s.color}">
+          ${subjectEmoji(data.subject)} ${esc(data.subject||'Matière')} — ${esc(data.topic||'')}
+        </span>
+        <span class="difficulty-badge">${esc(data.difficulty||'Intermédiaire')}</span>
+      </div>
+      <div class="analysis-summary">${esc(data.summary||'')}</div>
+      <div class="key-concepts">${conceptsHTML}</div>
+    </div>
+    <div class="recap-card">
+      <div class="recap-title">${t('sectionRecap')}</div>
+      <div class="recap-points">${recapHTML}</div>
+    </div>
+    <div class="section-title">${t('sectionExo')}</div>
+    <div class="exercises-grid">${exHTML}</div>
+    <div class="section-title">${t('sectionVid')}</div>
+    <div class="videos-grid">${vidHTML}</div>
+    <button class="new-btn" onclick="resetApp()">${t('newBtn')}</button>`;
+
+  el.classList.add('visible');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleEx(i) { document.getElementById('ex-'+i).classList.toggle('open'); }
+
+function resetApp() {
+  document.getElementById('results-section').classList.remove('visible');
+  document.getElementById('results-section').innerHTML='';
+  document.getElementById('scan-section').style.display='block';
+  clearImage();
+  document.getElementById('course-text').value='';
+  document.querySelectorAll('.subject-pill').forEach(p=>p.classList.remove('selected'));
+  selectedSubject='';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ============================================================
+//  HISTORY
+// ============================================================
+function saveToHistory(data) {
+  const history = getHistory();
+  const entry = {
+    id: Date.now(),
+    date: new Date().toLocaleDateString(lang==='mg'?'fr-MG':'fr-FR'),
+    subject: data.subject||'Inconnu',
+    topic: data.topic||'',
+    difficulty: data.difficulty||'',
+    summary: data.summary||'',
+    key_concepts: data.key_concepts||[],
+    recap_points: data.recap_points||[],
+    exercises: data.exercises||[],
+    youtube_queries: data.youtube_queries||[],
+    _videos: data._videos||[],
+  };
+  history.unshift(entry);
+  // Keep last 50
+  localStorage.setItem('ml_history', JSON.stringify(history.slice(0,50)));
+  updateStats();
+}
+
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem('ml_history')||'[]'); } catch { return []; }
+}
+
+function renderHistory() {
+  const history = getHistory();
+  const el = document.getElementById('history-content');
+  if (!history.length) {
+    el.innerHTML = `<div class="history-empty"><div class="empty-icon">📋</div><p>${t('histEmpty')}</p></div>`;
+    return;
+  }
+  const s = getColor;
+  el.innerHTML = `<div class="history-grid">${history.map(h=>`
+    <div class="history-card" onclick="loadFromHistory(${h.id})">
+      <div class="history-card-icon">${subjectEmoji(h.subject)}</div>
+      <div class="history-card-info">
+        <div class="history-card-title">${esc(h.topic||h.subject)}</div>
+        <div class="history-card-meta">
+          <span style="color:${getColor(h.subject).color}">${esc(h.subject)}</span>
+          <span>${h.date}</span>
+        </div>
+      </div>
+      <span class="history-badge">${esc(h.difficulty||'')}</span>
+      <button class="history-card-del" onclick="event.stopPropagation();deleteHistory(${h.id})">✕</button>
+    </div>`).join('')}</div>`;
+}
+
+function loadFromHistory(id) {
+  const history = getHistory();
+  const entry = history.find(h=>h.id===id);
+  if(!entry) return;
+  currentResult = entry;
+  goPage('home');
+  setTimeout(()=>{
+    document.getElementById('scan-section').style.display='none';
+    renderResults(entry);
+  },200);
+}
+
+function deleteHistory(id) {
+  const h = getHistory().filter(e=>e.id!==id);
+  localStorage.setItem('ml_history', JSON.stringify(h));
+  renderHistory();
+  updateStats();
+}
+
+function clearAllHistory() {
+  if(confirm('Effacer tout l\'historique ?')) {
+    localStorage.removeItem('ml_history');
+    renderHistory();
+    updateStats();
+  }
+}
+
+// ============================================================
+//  SETTINGS / STATS
+// ============================================================
+function updateStats() {
+  const h = getHistory();
+  document.getElementById('stat-total').textContent = h.length;
+  document.getElementById('stat-exo').textContent = h.reduce((a,e)=>a+(e.exercises?.length||0),0);
+  document.getElementById('stat-vid').textContent = h.reduce((a,e)=>a+(e._videos?.length||0),0);
+}
+
+function renderSettings() {
+  updateStats();
+  loadApiKeys();
+}
+
+// ============================================================
+//  UTILS
+// ============================================================
+function esc(s) {
+  if(!s)return'';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ============================================================
+//  SERVICE WORKER
+// ============================================================
+if('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
+
+// ============================================================
+//  INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', ()=>{
+  loadApiKeys();
+  applyTranslations();
+  updateStats();
+
+  // Apply saved lang
+  const savedLang = localStorage.getItem('ml_lang')||'fr';
+  lang = savedLang;
+  document.querySelectorAll('.lang-btn').forEach((b,i)=>b.classList.toggle('active',(i===0&&lang==='fr')||(i===1&&lang==='mg')));
+  applyTranslations();
+});
+</script>
+</body>
+</html>
